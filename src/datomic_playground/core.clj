@@ -85,4 +85,38 @@
 (d/touch (d/entity (d/db conn) macareno)) ;; efectivamente!!!
 
 
+(defn add-person-schema [conn]
+  (d/transact
+   conn
+   [{:db/id #db/id[:db.part/db -1]
+     :db/ident :person/name
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db/doc "Person's name"}
+    {:db/id #db/id[:db.part/db -2]
+     :db/ident :person/age
+     :db/valueType :db.type/long
+     :db/cardinality :db.cardinality/one
+     :db/doc "Person's age"}
+    {:db/id #db/id[:db.part/db -3]
+     :db/ident :person/friends
+     :db/valueType :db.type/ref
+     :db/cardinality :db.cardinality/many
+     :db/doc "Person's friends (refs to another people)"}
+    [:db/add :db.part/db :db.install/attribute #db/id[:db.part/db -1]]
+    [:db/add :db.part/db :db.install/attribute #db/id[:db.part/db -2]]
+    [:db/add :db.part/db :db.install/attribute #db/id[:db.part/db -3]]]))
+
+(add-person-schema conn)
+
+(d/transact
+ conn
+ [{:db/id #db/id[:db.part/user -1]
+   :person/name "Alejandro"
+   :person/age 53
+   :person/friends [#db/id[:db.part/user -2]]}
+  {:db/id #db/id[:db.part/user -2]
+   :person/name "Lucas"
+   :person/age 62
+   :person/friends [#db/id[:db.part/user -1]]}])
 
